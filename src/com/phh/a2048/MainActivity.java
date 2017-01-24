@@ -8,6 +8,8 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -24,6 +26,10 @@ import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+
 import de.cketti.library.changelog.ChangeLog;
 
 public class MainActivity extends Activity {
@@ -38,6 +44,9 @@ public class MainActivity extends Activity {
     private long mLastTouch;
     private static final long mTouchThreshold = 2000;
     private Toast pressBackToast;
+    private InterstitialAd adView;  // The ad
+    private Handler mHandler;       // Handler to display the ad on the UI thread
+    private Runnable displayAd;
 
     @SuppressLint({ "SetJavaScriptEnabled", "NewApi", "ShowToast" })
     @Override
@@ -122,6 +131,23 @@ public class MainActivity extends Activity {
 
         pressBackToast = Toast.makeText(getApplicationContext(), R.string.press_back_again_to_exit,
                 Toast.LENGTH_SHORT);
+
+        adView = new InterstitialAd(getApplicationContext());
+        adView.setAdUnitId("ca-app-pub-6009737925320371/5736408043");
+        mHandler = new Handler(Looper.getMainLooper());
+        displayAd = new Runnable() {
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        if (adView.isLoaded()) {
+                            adView.show();
+                        }
+                    }
+                });
+            }
+        };
+        loadAd();
+        displayInterstitial();
     }
 
     @Override
@@ -187,5 +213,24 @@ public class MainActivity extends Activity {
             pressBackToast.cancel();
             super.onBackPressed();
         }
+    }
+
+//    @Override
+//    public void onAdClosed() {
+//        loadAd(); // Need to reload the Ad when it is closed.
+//    }
+
+    void loadAd() {
+        AdRequest adRequest = new AdRequest.Builder()
+                //.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build();
+
+        // Load the adView object witht he request
+        adView.loadAd(adRequest);
+    }
+
+    //Call displayInterstitial() once you are ready to display the ad.
+    public void displayInterstitial() {
+        mHandler.postDelayed(displayAd, 1);
     }
 }

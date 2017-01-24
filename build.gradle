@@ -15,12 +15,16 @@ repositories {
 dependencies {
     compile 'com.android.support:support-v4:23.3.0'
     compile 'de.cketti.library.changelog:ckchangelog:1.2.2'
+    compile 'com.google.firebase:firebase-ads:10.0.1'
 }
 
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.1"
 
+    defaultConfig {
+        applicationId "com.phh.a2048"
+    }
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
